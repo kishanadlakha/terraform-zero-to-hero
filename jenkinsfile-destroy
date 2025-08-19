@@ -1,0 +1,49 @@
+pipeline {
+		agent any
+		environment {
+				AWS_DEFAULT_REGION	=	'eu-north-1'
+			}
+
+		stages	{
+			
+
+			stage('checkout')	{
+				steps	{
+					checkout scm
+					}
+				}
+
+			stage('Terraform Init')	{
+				steps	{
+					sh 'terraform init'
+					}
+				}
+
+		stage('Terraform plan destroy')	{
+		steps	{
+			sh 'terraform plan -destroy -out=tfplan_destroy'				
+			sh "terraform show -no-color tfplan_destroy | grep -E '^\\s*[+-~]' || echo 'No changes detected'"
+
+			}
+		}
+
+		stage('Approval') {
+			steps	{
+			input message: 'Do you want to destroy this infrastructure?', ok: 'Destroy'
+				}
+			}
+
+		stage('Terraform Apply Destroy')	{
+			steps	{
+			sh 'terraform apply -auto-approve tfplan_destroy'
+				}
+			}
+
+		stage('Show Output')	{
+			steps	{
+				sh 'terraform output'
+				}
+			}
+
+		}
+	}
