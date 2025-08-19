@@ -1,17 +1,18 @@
 pipeline {
 		agent any
-		environment {
-				AWS_DEFAULT_REGION	=	'eu-north-1'
-			}
+		        environment {
+                AWS_CREDS = credentials('aws-creds')
+                }
 
-		stages	{
-			
 
-			stage('checkout')	{
-				steps	{
-					checkout scm
-					}
-				}
+        stages {
+                stage('checkout') {
+                        steps {
+
+                                git branch: 'Terraform-ec2-template',
+                                        url: 'https://github.com/kishanadlakha/terraform-zero-to-hero.git'
+                                }
+                        }
 
 			stage('Terraform Init')	{
 				steps	{
